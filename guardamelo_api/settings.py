@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Third-Party Apps
     "django_filters",
     'graphene_django',
+    'rest_framework',
 
     # Custom Apps
     'accounts.apps.AccountsConfig',
@@ -57,8 +58,13 @@ MIDDLEWARE = [
 ]
 
 GRAPHENE = {
-    "SCHEMA": "guardamelo_api.schema.schema"
+    "SCHEMA": "guardamelo_api.schema.schema",
+    "MIDDLEWARE": [
+        "graphql_jwt.middleware.JSONWebTokenMiddleware",
+    ],
 }
+
+AUTH_USER_MODEL = "accounts.User"
 
 ROOT_URLCONF = 'guardamelo_api.urls'
 
