@@ -1,0 +1,8 @@
+.idea
+__pycache__
+.venv
+api/local_settings.py
+db.sqlite3
+.ipynb_checkpoints/
+.env
+uploads/
