@@ -1,6 +1,7 @@
 from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
 
+from projects.mutations import CreateProject, UpdateProject
 from projects.nodes import ProjectNode, DocumentNode
 
 
@@ -10,3 +11,8 @@ class Query(ObjectType):
 
     document = relay.Node.Field(DocumentNode)
     documents = DjangoFilterConnectionField(DocumentNode)
+
+
+class Mutation(ObjectType):
+    create_product = CreateProject.Field()
+    update_product = UpdateProject.Field()

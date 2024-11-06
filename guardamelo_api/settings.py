@@ -67,7 +67,8 @@ GRAPHENE = {
     ],
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+# TODO use os.environ.get("CORS_ALLOWED_ORIGINS", "").split(",")
+CORS_ALLOWED_ORIGINS = ["http://localhost:5174", "http://127.0.0.1:5174"]
 
 AUTH_USER_MODEL = "accounts.User"
 
