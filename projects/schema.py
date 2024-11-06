@@ -14,5 +14,5 @@ class Query(ObjectType):
 
 
 class Mutation(ObjectType):
-    create_product = CreateProject.Field()
-    update_product = UpdateProject.Field()
+    create_project = CreateProject.Field()
+    update_project = UpdateProject.Field()
