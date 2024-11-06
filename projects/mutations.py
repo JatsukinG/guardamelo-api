@@ -32,6 +32,7 @@ class CreateProject(relay.ClientIDMutation):
 
             setattr(project, field, value)
 
+        project.user = user
         project.save()
 
         return CreateProject(project=project)
@@ -48,13 +49,13 @@ class UpdateProject(relay.ClientIDMutation):
         user = info.context.user
         _, decoded_id = from_global_id(id)
 
+        if user.is_anonymous:
+            raise GraphQLError("You must be logged in to update a project.")
+
         try:
             project = Project.objects.get(id=decoded_id)
         except Project.DoesNotExist:
             raise GraphQLError("Project not found")
-
-        if project.user != user:
-            raise GraphQLError("You are not the user of this project.")
 
         for field, value in input.items():
             if hasattr(value, "value"):

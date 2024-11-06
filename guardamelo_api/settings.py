@@ -72,6 +72,11 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:5174", "http://127.0.0.1:5174"]
 
 AUTH_USER_MODEL = "accounts.User"
 
+AUTHENTICATION_BACKENDS = [
+    "graphql_jwt.backends.JSONWebTokenBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 ROOT_URLCONF = 'guardamelo_api.urls'
 
 TEMPLATES = [
