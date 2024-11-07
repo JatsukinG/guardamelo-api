@@ -16,3 +16,6 @@ class Query(ObjectType):
 class Mutation(ObjectType):
     create_project = CreateProject.Field()
     update_project = UpdateProject.Field()
+
+    create_document = CreateProject.Field()
+    update_document = UpdateProject.Field()
