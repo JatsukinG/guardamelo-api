@@ -1,4 +1,4 @@
-from graphene import relay, Field, String, ID
+from graphene import relay, Field, String, ID, Boolean
 from graphql import GraphQLError
 from graphql_relay import from_global_id
 
@@ -6,33 +6,21 @@ from projects.models import Project, Document
 from projects.nodes import ProjectNode, DocumentNode
 
 
-class ProjectFieldBase:
-    name = String(required=True)
-    description = String(required=False)
-
-
 class CreateProject(relay.ClientIDMutation):
     project = Field(ProjectNode)
 
-    class Input(ProjectFieldBase):
-        pass
+    class Input:
+        name = String(required=True)
+        description = String(required=False)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, **input):
         user = info.context.user
 
-        project = Project()
-
         if user.is_anonymous:
             raise GraphQLError("You must be logged in to create a project.")
 
-        for field, value in input.items():
-            if hasattr(value, "value"):
-                value = value.value
-
-            setattr(project, field, value)
-
-        project.user = user
+        project = Project(user=user, **input)
         project.save()
 
         return CreateProject(project=project)
@@ -41,8 +29,10 @@ class CreateProject(relay.ClientIDMutation):
 class UpdateProject(relay.ClientIDMutation):
     project = Field(ProjectNode)
 
-    class Input(ProjectFieldBase):
-        id = String(required=True)
+    class Input:
+        id = ID(required=True)
+        name = String(required=True)
+        description = String(required=False)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, **input):
@@ -53,19 +43,38 @@ class UpdateProject(relay.ClientIDMutation):
             raise GraphQLError("You must be logged in to update a project.")
 
         try:
-            project = Project.objects.get(id=decoded_id)
+            project = Project.objects.get(id=decoded_id, user=user)
         except Project.DoesNotExist:
-            raise GraphQLError("Project not found")
+            raise GraphQLError("Project not found or you do not have permission")
 
         for field, value in input.items():
-            if hasattr(value, "value"):
-                value = value.value
-
             setattr(project, field, value)
 
         project.save()
-
         return UpdateProject(project=project)
+
+
+class DeleteProject(relay.ClientIDMutation):
+    success = Boolean()
+
+    class Input:
+        id = ID(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, id):
+        user = info.context.user
+        _, decoded_id = from_global_id(id)
+
+        if user.is_anonymous:
+            raise GraphQLError("You must be logged in to delete a project.")
+
+        try:
+            project = Project.objects.get(id=decoded_id, user=user)
+        except Project.DoesNotExist:
+            raise GraphQLError("Project not found or you do not have permission")
+
+        project.delete()
+        return DeleteProject(success=True)
 
 
 class CreateDocument(relay.ClientIDMutation):
@@ -77,29 +86,35 @@ class CreateDocument(relay.ClientIDMutation):
         content = String(required=False)
 
     @classmethod
-    def mutate_and_get_payload(cls, root, info, **input):
+    def mutate_and_get_payload(cls, root, info, project_id, **input):
         user = info.context.user
-
-        document = Document()
 
         if user.is_anonymous:
             raise GraphQLError("You must be logged in to create a document.")
 
-        project = Project.objects.get(id)
+        _, decoded_project_id = from_global_id(project_id)
 
-        document.title = input.get("title")
-        document.project = user
+        try:
+            project = Project.objects.get(id=decoded_project_id, user=user)
+        except Project.DoesNotExist:
+            raise GraphQLError("Project not found or you do not have permission")
 
+        document = Document(
+            project=project,
+            **input
+        )
         document.save()
 
-        return CreateProject(document=document)
+        return CreateDocument(document=document)
 
 
 class UpdateDocument(relay.ClientIDMutation):
-    project = Field(ProjectNode)
+    document = Field(DocumentNode)
 
-    class Input(ProjectFieldBase):
-        id = String(required=True)
+    class Input:
+        id = ID(required=True)
+        title = String(required=False)
+        content = String(required=False)
 
     @classmethod
     def mutate_and_get_payload(cls, root, info, id, **input):
@@ -107,19 +122,38 @@ class UpdateDocument(relay.ClientIDMutation):
         _, decoded_id = from_global_id(id)
 
         if user.is_anonymous:
-            raise GraphQLError("You must be logged in to update a project.")
+            raise GraphQLError("You must be logged in to update a document.")
 
         try:
-            project = Project.objects.get(id=decoded_id)
-        except Project.DoesNotExist:
-            raise GraphQLError("Project not found")
+            document = Document.objects.get(id=decoded_id, project__user=user)
+        except Document.DoesNotExist:
+            raise GraphQLError("Document not found or you do not have permission")
 
         for field, value in input.items():
-            if hasattr(value, "value"):
-                value = value.value
+            setattr(document, field, value)
 
-            setattr(project, field, value)
+        document.save()
+        return UpdateDocument(document=document)
 
-        project.save()
 
-        return UpdateProject(project=project)
+class DeleteDocument(relay.ClientIDMutation):
+    success = Boolean()
+
+    class Input:
+        id = ID(required=True)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, id):
+        user = info.context.user
+        _, decoded_id = from_global_id(id)
+
+        if user.is_anonymous:
+            raise GraphQLError("You must be logged in to delete a document.")
+
+        try:
+            document = Document.objects.get(id=decoded_id, project__user=user)
+        except Document.DoesNotExist:
+            raise GraphQLError("Document not found or you do not have permission")
+
+        document.delete()
+        return DeleteDocument(success=True)
