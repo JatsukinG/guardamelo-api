@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     # Custom Apps
     'accounts.apps.AccountsConfig',
     'projects.apps.ProjectsConfig',
+    'resources.apps.ResourcesConfig',
 ]
 
 MIDDLEWARE = [

@@ -2,11 +2,13 @@ import graphene
 
 import accounts.schema
 import projects.schema
+import resources.schema
 
 
 class Query(
     accounts.schema.Query,
     projects.schema.Query,
+    resources.schema.Query,
     graphene.ObjectType,
 ):
     pass
@@ -15,6 +17,7 @@ class Query(
 class Mutation(
     accounts.schema.Mutation,
     projects.schema.Mutation,
+    resources.schema.Mutation,
     graphene.ObjectType,
 ):
     pass
