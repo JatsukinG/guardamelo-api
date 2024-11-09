@@ -15,11 +15,7 @@ class Resource(models.Model):
         related_name="resources",
     )
 
-    tags = models.JSONField(
-        models.CharField(max_length=50),
-        blank=True,
-        default=list
-    )
+    tags = models.JSONField(blank=True,default=list)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

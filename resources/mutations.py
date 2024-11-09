@@ -23,6 +23,11 @@ class CreateResource(relay.ClientIDMutation):
         if user.is_anonymous:
             raise GraphQLError("You must be logged in to create a resource.")
 
+        # Validación de que `tags` sea una lista JSON
+        tags = input.get("tags", [])
+        if tags and not isinstance(tags, list):
+            raise GraphQLError("Tags must be provided as a JSON list.")
+
         resource = Resource(author=user, **input)
         resource.save()
 
@@ -52,6 +57,11 @@ class UpdateResource(relay.ClientIDMutation):
             resource = Resource.objects.get(id=decoded_id, author=user)
         except Resource.DoesNotExist:
             raise GraphQLError("Resource not found or you do not have permission")
+
+        # Validación de que `tags` sea una lista JSON al actualizar
+        tags = input.get("tags", [])
+        if tags and not isinstance(tags, list):
+            raise GraphQLError("Tags must be provided as a JSON list.")
 
         for field, value in input.items():
             setattr(resource, field, value)
