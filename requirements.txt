@@ -1,3 +1,5 @@
+gunicorn
+dj-database-url==2.3.0
 Django==4.2.16
 django-cors-headers==4.6.0
 django-filter==24.3
