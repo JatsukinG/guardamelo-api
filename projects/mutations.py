@@ -2,8 +2,8 @@ from graphene import relay, Field, String, ID, Boolean
 from graphql import GraphQLError
 from graphql_relay import from_global_id
 
-from projects.models import Project, Document
-from projects.nodes import ProjectNode, DocumentNode
+from projects.models import Project, Note
+from projects.nodes import ProjectNode, NoteNode
 
 
 class CreateProject(relay.ClientIDMutation):
@@ -77,8 +77,8 @@ class DeleteProject(relay.ClientIDMutation):
         return DeleteProject(success=True)
 
 
-class CreateDocument(relay.ClientIDMutation):
-    document = Field(DocumentNode)
+class CreateNote(relay.ClientIDMutation):
+    note = Field(NoteNode)
 
     class Input:
         project_id = ID(required=True)
@@ -90,7 +90,7 @@ class CreateDocument(relay.ClientIDMutation):
         user = info.context.user
 
         if user.is_anonymous:
-            raise GraphQLError("You must be logged in to create a document.")
+            raise GraphQLError("You must be logged in to create a note.")
 
         _, decoded_project_id = from_global_id(project_id)
 
@@ -99,17 +99,17 @@ class CreateDocument(relay.ClientIDMutation):
         except Project.DoesNotExist:
             raise GraphQLError("Project not found or you do not have permission")
 
-        document = Document(
+        note = Note(
             project=project,
             **input
         )
-        document.save()
+        note.save()
 
-        return CreateDocument(document=document)
+        return CreateNote(note=note)
 
 
-class UpdateDocument(relay.ClientIDMutation):
-    document = Field(DocumentNode)
+class UpdateNote(relay.ClientIDMutation):
+    note = Field(NoteNode)
 
     class Input:
         id = ID(required=True)
@@ -122,21 +122,21 @@ class UpdateDocument(relay.ClientIDMutation):
         _, decoded_id = from_global_id(id)
 
         if user.is_anonymous:
-            raise GraphQLError("You must be logged in to update a document.")
+            raise GraphQLError("You must be logged in to update a note.")
 
         try:
-            document = Document.objects.get(id=decoded_id, project__user=user)
-        except Document.DoesNotExist:
-            raise GraphQLError("Document not found or you do not have permission")
+            note = Note.objects.get(id=decoded_id, project__user=user)
+        except Note.DoesNotExist:
+            raise GraphQLError("Note not found or you do not have permission")
 
         for field, value in input.items():
-            setattr(document, field, value)
+            setattr(note, field, value)
 
-        document.save()
-        return UpdateDocument(document=document)
+        note.save()
+        return UpdateNote(note=note)
 
 
-class DeleteDocument(relay.ClientIDMutation):
+class DeleteNote(relay.ClientIDMutation):
     success = Boolean()
 
     class Input:
@@ -148,12 +148,12 @@ class DeleteDocument(relay.ClientIDMutation):
         _, decoded_id = from_global_id(id)
 
         if user.is_anonymous:
-            raise GraphQLError("You must be logged in to delete a document.")
+            raise GraphQLError("You must be logged in to delete a note.")
 
         try:
-            document = Document.objects.get(id=decoded_id, project__user=user)
-        except Document.DoesNotExist:
-            raise GraphQLError("Document not found or you do not have permission")
+            note = Note.objects.get(id=decoded_id, project__user=user)
+        except Note.DoesNotExist:
+            raise GraphQLError("Note not found or you do not have permission")
 
-        document.delete()
-        return DeleteDocument(success=True)
+        note.delete()
+        return DeleteNote(success=True)

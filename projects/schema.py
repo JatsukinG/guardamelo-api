@@ -1,17 +1,16 @@
 from graphene import ObjectType, relay
 from graphene_django.filter import DjangoFilterConnectionField
 
-from projects.mutations import CreateProject, UpdateProject, DeleteProject, CreateDocument, \
-    UpdateDocument, DeleteDocument
-from projects.nodes import ProjectNode, DocumentNode
+from projects.mutations import CreateProject, UpdateProject, DeleteProject, CreateNote, UpdateNote, DeleteNote
+from projects.nodes import ProjectNode, NoteNode
 
 
 class Query(ObjectType):
     project = relay.Node.Field(ProjectNode)
     projects = DjangoFilterConnectionField(ProjectNode)
 
-    document = relay.Node.Field(DocumentNode)
-    documents = DjangoFilterConnectionField(DocumentNode)
+    note = relay.Node.Field(NoteNode)
+    notes = DjangoFilterConnectionField(NoteNode)
 
 
 class Mutation(ObjectType):
@@ -19,6 +18,6 @@ class Mutation(ObjectType):
     update_project = UpdateProject.Field()
     delete_project = DeleteProject.Field()
 
-    create_document = CreateDocument.Field()
-    update_document = UpdateDocument.Field()
-    delete_document = DeleteDocument.Field()
+    create_note = CreateNote.Field()
+    update_note = UpdateNote.Field()
+    delete_note = DeleteNote.Field()

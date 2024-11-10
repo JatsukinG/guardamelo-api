@@ -1,7 +1,7 @@
 from graphene import relay
 from graphene_django import DjangoObjectType
 
-from projects.models import Project, Document
+from projects.models import Project, Note
 
 
 class ProjectNode(DjangoObjectType):
@@ -11,8 +11,8 @@ class ProjectNode(DjangoObjectType):
         interfaces = (relay.Node,)
 
 
-class DocumentNode(DjangoObjectType):
+class NoteNode(DjangoObjectType):
     class Meta:
-        model = Document
+        model = Note
         filter_fields = []
         interfaces = (relay.Node,)

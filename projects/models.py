@@ -19,11 +19,11 @@ class Project(models.Model):
         return self.name
 
 
-class Document(models.Model):
+class Note(models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        related_name="documents",
+        related_name="notes",
     )
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)

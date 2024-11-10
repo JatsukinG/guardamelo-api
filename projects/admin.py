@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from projects.models import Project, Document
+from projects.models import Project, Note
 
 
 @admin.register(Project)
@@ -11,8 +11,8 @@ class ProjectAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
 
 
-@admin.register(Document)
-class DocumentAdmin(admin.ModelAdmin):
+@admin.register(Note)
+class NoteAdmin(admin.ModelAdmin):
     list_display = ('title', 'project', 'created_at')
     search_fields = ('title', 'project__name')
     list_filter = ('project',)
