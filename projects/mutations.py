@@ -1,7 +1,9 @@
-from graphene import relay, Field, String, ID, Boolean
+from graphene import relay, Field, String, ID, Boolean, List, Node
 from graphql import GraphQLError
 from graphql_relay import from_global_id
 
+from accounts.models import User
+from projects.choices import NOTE_VISIBILITY_CHOICES
 from projects.models import Project, Note
 from projects.nodes import ProjectNode, NoteNode
 
@@ -157,3 +159,38 @@ class DeleteNote(relay.ClientIDMutation):
 
         note.delete()
         return DeleteNote(success=True)
+
+
+class UpdateNoteVisibility(relay.ClientIDMutation):
+    success = Boolean()
+
+    class Input:
+        id = ID(required=True)
+        visibility = String(required=True)
+        shared_with = List(ID, required=False)
+
+    @classmethod
+    def mutate_and_get_payload(cls, root, info, id, visibility, shared_with=None):
+        user = info.context.user
+        print(user, id, visibility)
+        note = Node.get_node_from_global_id(info, id, only_type=NoteNode)
+
+        if user.is_anonymous:
+            raise GraphQLError("You must be logged in to delete a note.")
+
+        if note.project.user != user:
+            raise GraphQLError("You do not have permission to change this note's visibility.")
+
+        if visibility not in [choice[0] for choice in NOTE_VISIBILITY_CHOICES]:
+            raise GraphQLError("Invalid visibility option.")
+
+        note.visibility = visibility
+
+        if visibility == 'shared' and shared_with:
+            users = User.objects.filter(id__in=shared_with)
+            note.shared_with.set(users)
+        else:
+            note.shared_with.clear()
+
+        note.save()
+        return UpdateNoteVisibility(success=True)

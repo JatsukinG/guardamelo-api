@@ -1,6 +1,7 @@
 from graphene import relay
 from graphene_django import DjangoObjectType
 
+from projects.filtersets import NoteFilterSet
 from projects.models import Project, Note
 
 
@@ -14,5 +15,5 @@ class ProjectNode(DjangoObjectType):
 class NoteNode(DjangoObjectType):
     class Meta:
         model = Note
-        filter_fields = []
+        filterset_class = NoteFilterSet
         interfaces = (relay.Node,)
