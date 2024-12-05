@@ -3,7 +3,7 @@ from graphene_django.filter import DjangoFilterConnectionField
 from graphql import GraphQLError
 from graphql_relay import from_global_id
 
-from projects.models import Note
+from projects.models import Note, Project
 from projects.mutations import CreateProject, UpdateProject, DeleteProject, CreateNote, UpdateNote, \
     DeleteNote, UpdateNoteVisibility
 from projects.nodes import ProjectNode, NoteNode
@@ -18,6 +18,12 @@ class Query(ObjectType):
         NoteNode,
         project_id=String(required=True)
     )
+
+    def resolve_projects(root, info, **kwargs):
+        user = info.context.user
+        if user.is_anonymous:
+            raise GraphQLError("You must be logged in to view projects.")
+        return Project.objects.filter(user=user)
 
     def resolve_notes(root, info, project_id: str, **kwargs):
         _, project_id = from_global_id(project_id)
